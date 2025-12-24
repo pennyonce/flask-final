@@ -23,3 +23,5 @@ MAIL_USERNAME = '2037259841@qq.com'
 MAIL_PASSWORD = 'brbcqwepazsecfdd'
 # 邮箱账号
 MAIL_DEFAULT_SENDER = '2037259841@qq.com'
+
+REDIS_URL = "redis://localhost:6379/0"

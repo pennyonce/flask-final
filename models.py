@@ -11,20 +11,13 @@ class UserModel(db.Model):
     join_time = db.Column(db.DateTime, default=datetime.now)
 
 
-class EmailCaptchaModel(db.Model):
-    __tablename__ = 'email_captcha'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    email = db.Column(db.String(100), nullable=False)
-    captcha = db.Column(db.String(100), nullable=False)
-    used = db.Column(db.String(100), nullable=False)
-
 
 class QuestionModel(db.Model):
     __tablename__ = 'question'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
-    creat_time = db.Column(db.DateTime, default=datetime.now)
+    create_time = db.Column(db.DateTime, default=datetime.now)
 
     # 外键
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -37,10 +30,10 @@ class AnswerModel(db.Model):
     __tablename__ = 'answer'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     content = db.Column(db.Text, nullable=False)
-    creat_time = db.Column(db.DateTime, default=datetime.now)
+    create_time = db.Column(db.DateTime, default=datetime.now)
 
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'))
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    question = db.relationship(QuestionModel, backref=db.backref('answers', order_by=creat_time.desc()))
+    question = db.relationship(QuestionModel, backref=db.backref('answers', order_by=create_time.desc()))
     author = db.relationship(UserModel, backref='answers')

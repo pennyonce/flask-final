@@ -1,6 +1,6 @@
 from flask import Flask, session, g
 import config
-from exts import db, mail
+from exts import db, mail, flask_redis
 from models import UserModel
 from blueprints.qa import bp as qa_bp
 from blueprints.author import bp as author_bp
@@ -13,6 +13,7 @@ app.config.from_object(config)
 
 db.init_app(app)
 mail.init_app(app)
+flask_redis.init_app(app)
 
 Migrate = Migrate(app, db)
 

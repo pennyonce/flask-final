@@ -1,6 +1,6 @@
 import wtforms
 from wtforms.validators import Email, Length, EqualTo, InputRequired
-from models import UserModel, EmailCaptchaModel
+from models import UserModel
 from exts import db
 
 
@@ -19,17 +19,6 @@ class RegisterForm(wtforms.Form):
         user = UserModel.query.filter_by(email=email).first()
         if user:
             raise wtforms.ValidationError(message='该邮箱已被注册')
-
-    #  验证验证码是否正确
-    def validate_captcha(self, field):
-        captcha = field.data
-        email = self.email.data
-        captcha_model = EmailCaptchaModel.query.filter_by(email=email, captcha=captcha).first()
-        if not captcha_model:
-            raise wtforms.ValidationError(message='邮箱验证错误')
-        # else:
-        #     db.session.delete(captcha_model)
-        #     db.session.commit()
 
 
 class LoginForm(wtforms.Form):

@@ -13,15 +13,12 @@
         {% if questions != [] %}
         {% for question in questions %}
         <div class="list-group mt-4">
-            <a href="#"
-                class="list-group-item list-group-item-action">
-                <div class="d-flex w-100 justify-content-between">
-                    <a href="{{ url_for('qa.qa_detail', qa_id=question.id) }}">{{ question.title}}</a>
-                    <small style="color: red;">{{ question.create_time }}</small>
-                </div>
-                <p class="mb-1">{{ question.content }}</p>
-                <small style="color: green;">{{ question.author.username }}</small>
-            </a>
+            <div >
+                <a href="{{ url_for('qa.qa_detail', qa_id=question.id) }}">{{ question.title}}</a>
+                <small style="color: grey;text-align:right;float:right">{{ question.create_time }}</small>
+            </div>
+            <p class="mb-1">{{ question.content }}</p>
+            <small style="color: green;">作者:{{ question.author.username }}</small>
         </div>
         {% endfor %}
         {% else %}

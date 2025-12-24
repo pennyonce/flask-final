@@ -1,10 +1,9 @@
-from flask import Blueprint, render_template, jsonify, redirect, url_for, session
-from exts import mail, db
+from flask import Blueprint, render_template, jsonify, redirect, url_for, session, current_app
+from exts import mail, db, flask_redis
 from flask_mail import Message
 from flask import request
 import string
 import random
-from models import EmailCaptchaModel
 from .forms import RegisterForm, LoginForm
 from models import UserModel
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -47,10 +46,24 @@ def register():
             email = form.email.data
             username = form.username.data
             password = form.password.data
-            user = UserModel(email=email, username=username, password=generate_password_hash(password))
-            db.session.add(user)
-            db.session.commit()
-            return redirect('/author/login')
+            code = request.form.get('captcha')
+            key = f'verify_code:{email}'
+            try:
+                stored_code = flask_redis.get(key)
+                # 验证码不存在或者过期
+                if not stored_code:
+                    return jsonify({'result': False, 'message': '验证码已过期或不存在'}), 400
+                if stored_code.decode('utf-8') != code:
+                    return jsonify({'result': False, 'message': '验证码错误'})
+
+                user = UserModel(email=email, username=username, password=generate_password_hash(password))
+                db.session.add(user)
+                db.session.commit()
+                flask_redis.delete(key)
+                return redirect('/author/login')
+            except Exception as e:
+                current_app.logger.error(f'验证错误:{str(e)}')
+                return jsonify({'result': False, 'message': '系统错误请重试'})
         else:
             print(form.errors)
             return '失败'
@@ -61,17 +74,27 @@ def register():
 @bp.route('/captcha/email')
 def get_email_captcha():
     email = request.args.get('email')
+    if not email:
+        return jsonify({'result': False, 'message': '请输入邮箱！'})
+    # 生成验证码
     source = string.digits * 4
-    captcha = random.sample(source, 4)
-    captcha = ''.join(captcha)
-    message = Message(subject='破解版支符宝验证码', recipients=['13829233106@163.com'],
-                      body=f'您的验证码是：{captcha}，请勿泄露。')
-    mail.send(message)
-    # 服务器验证码存储 memcached/redis/数据库存储
-    email_captcha = EmailCaptchaModel(email=email, captcha=captcha)
-    db.session.add(email_captcha)
-    db.session.commit()
-    return jsonify({'code': 200, 'message': '', 'data': None})
+    code = ''.join(random.sample(source, 4))
+    print(code)
+    message = Message(
+        subject='破解版吱符宝注册验证码',
+        recipients=[email],
+        body=f'验证码为:{code},一分钟有效',
+    )
+    key = f'verify_code:{email}'
+    try:
+        flask_redis.setex(key, 60, code)
+        mail.send(message)
+        print(f'【模拟】发送验证码{code}到邮箱{email}')
+        return jsonify({'result': True,
+                        'message': '验证码发送成功！'})
+    except Exception as e:
+        current_app.logger.error(f'发送验证码时redis错误:{e}')
+        return jsonify({'result': False, 'message': '系统错误请重试'}), 500
 
 
 @bp.route('/logout')

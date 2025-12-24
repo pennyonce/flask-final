@@ -9,7 +9,7 @@ bp = Blueprint('qa', __name__, url_prefix='/')
 
 @bp.route('/')
 def index():
-    questions = QuestionModel.query.order_by(QuestionModel.creat_time.desc()).all()
+    questions = QuestionModel.query.order_by(QuestionModel.create_time.desc()).all()
     return render_template('index.html', questions=questions)
 
 
