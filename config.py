@@ -20,7 +20,7 @@ MAIL_PORT = 465
 # 邮箱账号
 MAIL_USERNAME = '2037259841@qq.com'
 # 授权码
-MAIL_PASSWORD = 'brbcqwepazsecfdd'
+MAIL_PASSWORD = '**************'
 # 邮箱账号
 MAIL_DEFAULT_SENDER = '2037259841@qq.com'
 
